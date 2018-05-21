@@ -129,14 +129,19 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     print('Training ...')
     print()
     for epoch in range(epochs):
-      print("Epoch "+epoch)
+      batch_count = 0
+      loss_sum = 0
+      print("Epoch "+str(epoch))
       for image, label in get_batches_fn(batch_size):
         feed = {input_image: image,
                     correct_label: label,
                     keep_prob: 0.5,
-                    learning_rate: 0.0003}
+                    learning_rate: 0.0004}
         _, loss = sess.run([train_op, cross_entropy_loss], feed_dict=feed)
-        print("Loss: = {:.3f}".format(loss))
+        loss_sum += loss
+        batch_count += 1
+      avg_loss = loss_sum / batch_count
+      print("Avg Loss: = {:.3f}".format(avg_loss))
       print()
     
     pass
@@ -165,15 +170,15 @@ def run():
 
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
-        epochs = 50
-        batch_size = 5
+        epochs = 20
+        batch_size = 4
         correct_label = tf.placeholder(tf.int32, [None, None, None, num_classes], name='correct_label')
         learning_rate = tf.placeholder(tf.float32, name='learning_rate')
         # TODO: Build NN using load_vgg, layers, and optimize function
         input_image, keep_prob, vgg_layer3_out, vgg_layer4_out, vgg_layer7_out = load_vgg(sess, vgg_path)
         nn_last_layer = layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes)
         logits, train_op, cross_entropy_loss = optimize(nn_last_layer, correct_label, learning_rate, num_classes)
-
+        sess.run(tf.global_variables_initializer())
         # TODO: Train NN using the train_nn function
         train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
              correct_label, keep_prob, learning_rate)
