@@ -59,14 +59,17 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # TODO: Implement function
     
     layer_7_out = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, 
-                                   padding= 'same', 
+                                   padding= 'same',
+                                   kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                    kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3)) 
     layer_4_input = tf.layers.conv2d_transpose(layer_7_out, num_classes, 4, 
                                              strides= (2, 2), 
-                                             padding= 'same',  
+                                             padding= 'same',
+                                             kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                              kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
     layer_4_conv_input = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, 
                                    padding= 'same', 
+                                   kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                    kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
     
     layer_4_out = tf.add(layer_4_input, layer_4_conv_input)
@@ -74,16 +77,19 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     layer_3_input = tf.layers.conv2d_transpose(layer_4_out, num_classes, 4, 
                                              strides= (2, 2), 
                                              padding= 'same',  
+                                             kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                              kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
     layer_3_conv_input = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, 
                                    padding= 'same', 
+                                   kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                    kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
     
     layer_3_out = tf.add(layer_3_input,layer_3_conv_input)
     
-    nn_output = tf.layers.conv2d_transpose(layer_3_out, num_classes, 16,  
+    nn_output = tf.layers.conv2d_transpose(layer_3_out, num_classes, 8,  
                                                strides= (8, 8), 
                                                padding= 'same',
+                                               kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                                kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3)) 
     
     return nn_output
@@ -135,7 +141,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
       for image, label in get_batches_fn(batch_size):
         feed = {input_image: image,
                     correct_label: label,
-                    keep_prob: 0.5,
+                    keep_prob: 0.6,
                     learning_rate: 0.0004}
         _, loss = sess.run([train_op, cross_entropy_loss], feed_dict=feed)
         loss_sum += loss
